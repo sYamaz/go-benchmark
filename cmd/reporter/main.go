@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sYamaz/benchmark/internal/pkg/markdown"
+	"github.com/sYamaz/mdstruct"
 	"golang.org/x/tools/benchmark/parse"
 )
 
@@ -215,7 +215,7 @@ func convertToPrettyJson(groups []BenchmarkGroup) ([]byte, error) {
 // }
 
 func convertToMarkdown(groups []BenchmarkGroup) ([]byte, error) {
-	doc := markdown.NewMDDocument(nil)
+	doc := mdstruct.NewMDDocument(nil)
 
 	for _, group := range groups {
 		convertToMarkdownCore(doc, group)
@@ -226,23 +226,23 @@ func convertToMarkdown(groups []BenchmarkGroup) ([]byte, error) {
 	return []byte(str), nil
 }
 
-func convertToMarkdownCore(doc *markdown.MDDocument, group BenchmarkGroup) {
+func convertToMarkdownCore(doc *mdstruct.MDDocument, group BenchmarkGroup) {
 	// 見出し
-	headline := markdown.NewMDHeadline(group.Depth+1, []markdown.MDInline{markdown.NewMDText(group.Key)})
+	headline := mdstruct.NewMDHeadline(group.Depth+1, mdstruct.NewMDText(group.Key))
 	doc.Add(headline)
 
 	// テーブル
-	rows := []markdown.MDTableRow{}
+	rows := []mdstruct.MDTableRow{}
 
 	for _, ch := range group.ChildGroups {
 		// childrenが葉の場合、テーブルに突っ込む
 		if len(ch.ChildGroups) == 0 { // 葉の場合
 			for _, v := range ch.Value {
-				rows = append(rows, *markdown.NewMDTableRow(
-					[]markdown.MDTableCell{
-						*markdown.NewMDTableCell(markdown.NewMDText(v.Name).ToInlines()),
-						*markdown.NewMDTableCell(markdown.NewMDText(strconv.Itoa(v.N)).ToInlines()),
-						*markdown.NewMDTableCell(markdown.NewMDText(strconv.FormatFloat(v.NsPerOp, 'f', -1, 64)).ToInlines()),
+				rows = append(rows, *mdstruct.NewMDTableRow(
+					[]mdstruct.MDTableCell{
+						*mdstruct.NewMDTableCell(mdstruct.NewMDText(v.Name)),
+						*mdstruct.NewMDTableCell(mdstruct.NewMDText(strconv.Itoa(v.N))),
+						*mdstruct.NewMDTableCell(mdstruct.NewMDText(strconv.FormatFloat(v.NsPerOp, 'f', -1, 64))),
 					},
 				))
 			}
@@ -255,13 +255,13 @@ func convertToMarkdownCore(doc *markdown.MDDocument, group BenchmarkGroup) {
 	}
 
 	if len(rows) != 0 {
-		table := markdown.NewMDTable(
+		table := mdstruct.NewMDTable(
 			// header
-			*markdown.NewMDTableRow(
-				[]markdown.MDTableCell{
-					*markdown.NewMDTableCell(markdown.NewMDText("key").ToInlines()),
-					*markdown.NewMDTableCell(markdown.NewMDText("N").ToInlines()),
-					*markdown.NewMDTableCell(markdown.NewMDText("ns/op").ToInlines()),
+			*mdstruct.NewMDTableRow(
+				[]mdstruct.MDTableCell{
+					*mdstruct.NewMDTableCell(mdstruct.NewMDText("key")),
+					*mdstruct.NewMDTableCell(mdstruct.NewMDText("N")),
+					*mdstruct.NewMDTableCell(mdstruct.NewMDText("ns/op")),
 				},
 			),
 			rows,
